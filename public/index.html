@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Módulos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+    /* LOGIN */
+    .login-container {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .login-box {
+      background: white; padding: 40px; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 380px;
+    }
+    .login-box h1 { text-align: center; color: #333; margin-bottom: 8px; font-size: 28px; }
+    .login-box p.subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 6px; color: #555; font-weight: 600; font-size: 14px; }
+    .form-group input {
+      width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px;
+      font-size: 15px; transition: border-color 0.2s;
+    }
+    .form-group input:focus { outline: none; border-color: #667eea; }
+    .btn-login {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; }
+    .error-msg { color: #e74c3c; text-align: center; margin-top: 12px; font-size: 14px; display: none; }
+    .credentials-hint {
+      margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px;
+      font-size: 12px; color: #666; text-align: center; line-height: 1.6;
+    }
+
+    /* DASHBOARD */
+    .dashboard { display: none; }
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .navbar h2 { color: white; font-size: 20px; }
+    .navbar .user-info { display: flex; align-items: center; gap: 16px; }
+    .navbar .user-info span { color: rgba(255,255,255,0.9); font-size: 14px; }
+    .navbar .role-badge {
+      background: rgba(255,255,255,0.2); color: white; padding: 4px 12px;
+      border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+    .modules-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px; padding: 40px 32px; max-width: 1000px; margin: 0 auto;
+    }
+    .module-card {
+      background: white; border-radius: 16px; padding: 32px 24px;
+      text-align: center; cursor: pointer; transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 2px solid transparent;
+    }
+    .module-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); border-color: #667eea; }
+    .module-card .icon { font-size: 48px; margin-bottom: 16px; }
+    .module-card .name { font-size: 18px; font-weight: 600; color: #333; }
+
+    /* MODULE PAGE */
+    .module-page { display: none; }
+    .module-header {
+      background: white; padding: 20px 32px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .btn-back {
+      background: #f0f2f5; border: none; padding: 10px 20px; border-radius: 8px;
+      cursor: pointer; font-size: 14px; color: #555; font-weight: 600; transition: background 0.2s;
+    }
+    .btn-back:hover { background: #e0e2e5; }
+    .module-header h3 { font-size: 22px; color: #333; }
+    .module-content {
+      display: flex; justify-content: center; align-items: center;
+      min-height: calc(100vh - 140px); color: #aaa; font-size: 18px;
+    }
+    .empty-state {
+      text-align: center; padding: 40px;
+    }
+    .empty-state .empty-icon { font-size: 80px; margin-bottom: 20px; opacity: 0.5; }
+    .empty-state p { color: #999; font-size: 16px; }
+    .empty-state .hint { color: #bbb; font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginView" class="login-container">
+    <div class="login-box">
+      <h1>Bienvenido</h1>
+      <p class="subtitle">Inicia sesión para continuar</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="username" placeholder="Tu usuario" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="password" placeholder="Tu contraseña" required>
+        </div>
+        <button type="submit" class="btn-login">Iniciar Sesión</button>
+        <p id="errorMsg" class="error-msg"></p>
+      </form>
+      <div class="credentials-hint">
+        <strong>Usuarios de prueba:</strong><br>
+        admin / admin123 (Administrador)<br>
+        usuario / user123 (Usuario)
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardView" class="dashboard">
+    <nav class="navbar">
+      <h2>Sistema de Módulos</h2>
+      <div class="user-info">
+        <span id="welcomeMsg"></span>
+        <span id="roleBadge" class="role-badge"></span>
+        <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+      </div>
+    </nav>
+    <div id="modulesGrid" class="modules-grid"></div>
+  </div>
+
+  <!-- MODULE PAGE -->
+  <div id="modulePageView" class="module-page">
+    <nav class="navbar">
+      <h2>Sistema de Módulos</h2>
+      <div class="user-info">
+        <span id="welcomeMsg2"></span>
+        <span id="roleBadge2" class="role-badge"></span>
+        <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+      </div>
+    </nav>
+    <div class="module-header">
+      <button class="btn-back" onclick="goBack()">← Volver</button>
+      <h3 id="moduleTitle"></h3>
+    </div>
+    <div class="module-content">
+      <div class="empty-state">
+        <div class="empty-icon" id="moduleIcon"></div>
+        <p id="moduleEmptyText">Este módulo está vacío</p>
+        <p class="hint">Aquí se mostrará el contenido del módulo</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    // Check session on load
+    fetch('/api/me').then(r => r.ok ? r.json() : null).then(user => {
+      if (user) { currentUser = user; showDashboard(); }
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('errorMsg');
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!res.ok) {
+        errEl.textContent = 'Usuario o contraseña incorrectos';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      currentUser = await res.json();
+      errEl.style.display = 'none';
+      showDashboard();
+    });
+
+    async function showDashboard() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('modulePageView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'block';
+
+      document.getElementById('welcomeMsg').textContent = `Hola, ${currentUser.username}`;
+      document.getElementById('roleBadge').textContent = currentUser.role;
+      document.getElementById('welcomeMsg2').textContent = `Hola, ${currentUser.username}`;
+      document.getElementById('roleBadge2').textContent = currentUser.role;
+
+      const res = await fetch('/api/modules');
+      const modules = await res.json();
+      const grid = document.getElementById('modulesGrid');
+      grid.innerHTML = '';
+
+      modules.forEach(mod => {
+        const card = document.createElement('div');
+        card.className = 'module-card';
+        card.innerHTML = `<div class="icon">${mod.icon}</div><div class="name">${mod.name}</div>`;
+        card.addEventListener('click', () => openModule(mod));
+        grid.appendChild(card);
+      });
+    }
+
+    function openModule(mod) {
+      document.getElementById('dashboardView').style.display = 'none';
+      document.getElementById('modulePageView').style.display = 'block';
+      document.getElementById('moduleTitle').textContent = mod.name;
+      document.getElementById('moduleIcon').textContent = mod.icon;
+      document.getElementById('moduleEmptyText').textContent = `Módulo "${mod.name}" — Sin contenido aún`;
+    }
+
+    function goBack() {
+      showDashboard();
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      currentUser = null;
+      document.getElementById('dashboardView').style.display = 'none';
+      document.getElementById('modulePageView').style.display = 'none';
+      document.getElementById('loginView').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
