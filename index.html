@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Compartida - Preview Unificado</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      body { font-family: sans-serif; background: #0d1117; color: #e6edf3; padding: 2rem; }
+      .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; }
+      .card h2 { color: #bc8cff; margin-top: 0; }
+      .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.8rem; }
+      .badge-s1 { background: rgba(63,185,80,0.2); color: #3fb950; }
+      .badge-s2 { background: rgba(210,153,34,0.2); color: #d29922; }
+      h1 { text-align: center; }
+      .info { text-align: center; color: #8b949e; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <h1>Preview Unificado</h1>
+    <p class="info">Este preview muestra cambios de AMBAS sesiones compartidas</p>
+
+    <div class="card">
+      <h2>Login Component <span class="badge badge-s1">Sesion: prueba-shared</span></h2>
+      <p>Editado desde la sesion <strong>prueba-shared</strong></p>
+      <pre id="login-code"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Dashboard Component <span class="badge badge-s2">Sesion: prueba-shared2</span></h2>
+      <p>Editado desde la sesion <strong>prueba-shared2</strong></p>
+      <pre id="dashboard-code"></pre>
+    </div>
+
+    <script src="login.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+      document.getElementById("login-code").textContent = login.toString ? login.toString() : "login module loaded";
+      document.getElementById("dashboard-code").textContent = renderDashboard.toString ? renderDashboard.toString() : "dashboard module loaded";
+    </script>
+</body>
+</html>
