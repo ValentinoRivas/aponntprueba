@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Syntax check JS files
+        run: |
+          set -e
+          # Check every .js file outside node_modules parses without error.
+          # Fast (no execution), catches typos that would crash the server.
+          find . -type f -name '*.js' -not -path './node_modules/*' -print0 \
+            | xargs -0 -n1 node --check
+
+      - name: Audit dependencies
+        # Non-blocking: surfaces vulnerabilities but doesn't fail the build,
+        # since most are in transitive deps and not always actionable.
+        run: npm audit --audit-level=high || true
